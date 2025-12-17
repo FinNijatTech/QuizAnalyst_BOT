@@ -2,7 +2,7 @@ import telebot
 import schedule
 import time
 import json
-import random  # Ensure random is imported
+import random
 from threading import Thread
 
 # Your bot token from BotFather
@@ -16,99 +16,72 @@ GROUP_ID = "-1003665927824"  # Replace with your actual group ID
 
 def load_questions_from_json(file_name):
     with open(file_name, mode="r", encoding="utf-8") as file:
-        questions = json.load(file)
-        # Debugging line to print JSON structure
-        print("Loaded JSON Data: ", questions)
+        data = json.load(file)
+        questions = data['questions']  # Access the questions list
     return questions
 
 
-# Load the questions from the JSON file
+# Load questions from JSON file
 questions = load_questions_from_json("FRM P1 All Questions.json")
 
-# Check the structure of loaded data
-print("Type of questions: ", type(questions))  # Should be a list
-# Should show the first question dictionary
-print("First question: ", questions[0])
+# Track used questions (question indices or IDs)
+used_questions = []
 
-# Track used questions by their IDs (this ensures no duplicates)
-used_questions_ids = set()
+# Function to get random question ensuring it's not repeated
 
 
 def get_random_question():
     """Selects a random question, ensuring it's not repeated."""
-    # Ensure questions is a list
-    if isinstance(questions, list):
-        available_questions = [
-            q for q in questions if q['id'] not in used_questions_ids]
-    else:
-        raise TypeError("Questions data should be a list of dictionaries.")
-
+    available_questions = [q for i, q in enumerate(
+        questions) if i not in used_questions]
     if not available_questions:
-        # If all questions have been used, reset the used questions list
-        used_questions_ids.clear()
+        # Reset used questions if all have been used
+        used_questions.clear()
         available_questions = questions
 
-    # Select a random question
     question = random.choice(available_questions)
-
-    # Mark the question as used
-    used_questions_ids.add(question['id'])
+    question_index = questions.index(question)
+    used_questions.append(question_index)
 
     return question
 
-# Function to format table data as text (for questions with tables)
+# Function to send the daily quiz
 
 
-def format_table_as_text(table_data):
-    rows = table_data["rows"]
-    headers = table_data["headers"]
-    table_text = " | ".join(headers) + "\n"
-    for row in rows:
-        table_text += " | ".join(row) + "\n"
-    return table_text
-
-# Function to send the quiz
-
-
-def send_daily_quiz():
+def send_hourly_quiz():
     question = get_random_question()
 
     # Prepare options in the correct format for Telegram
     options = [opt["text"] for opt in question["options"]]
 
-    # If the question has a table, format it as text
-    if question.get("tableData"):
-        table_text = format_table_as_text(question["tableData"])
-        # Append table as text to question text
-        question["question_text"] += f"\n\n{table_text}"
-
-    # Send the quiz message (no open_period parameter to keep the poll open indefinitely)
+    # Send the quiz message
     bot.send_poll(
         GROUP_ID,
-        question["question_text"],  # The question text
+        question["questionText"],  # The question text
         options,  # Options
         is_anonymous=False,  # Make the poll public
         type="quiz",  # It's a quiz
         correct_option_id=question["options"].index(next(
             # Correct option index
-            opt for opt in question["options"] if opt["id"] in question["correct_option_ids"])),
-        explanation=question["explanation"]  # Use explanation
-        # No open_period specified (the poll will remain open indefinitely)
+            opt for opt in question["options"] if opt["id"] in question["correctOptionIds"])),
+        explanation=question["explanation"],  # Use explanation
+        # The time in seconds to keep the poll open (adjust as needed)
+        open_period=60  # Keep the poll open for 1 minute
     )
 
-# Schedule the quiz to send every 4 hours (6 questions per day)
+# Function to schedule the quiz
 
 
-def schedule_quiz_every_4_hours():
+def schedule_hourly_quiz():
     # Send quiz immediately upon startup
-    send_daily_quiz()
+    send_hourly_quiz()
 
-    # Then send every 4 hours after that
-    schedule.every(4).hours.do(send_daily_quiz)
+    # Then send every hour after that
+    schedule.every().hour.do(send_hourly_quiz)
 
 
-# Start the quiz scheduling loop
-schedule_quiz_every_4_hours()
+# Start the hourly quiz scheduling
+schedule_hourly_quiz()
 
 # Keep checking the schedule
 
