@@ -2,7 +2,7 @@ import telebot
 import schedule
 import time
 import json
-import random  # Ensure random is imported
+import random
 from threading import Thread
 
 # Your bot token from BotFather
@@ -36,8 +36,8 @@ def get_random_question():
         used_questions.clear()
         available_questions = questions
 
-    question = random.choice(available_questions)  # This works now as expected
-    # Now we can safely use index() without error
+    question = random.choice(available_questions)  # Select a random question
+    # Find its index in the full list
     question_index = questions.index(question)
     used_questions.append(question_index)
 
