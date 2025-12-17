@@ -68,7 +68,7 @@ def send_daily_quiz():
     # Prepare options in the correct format for Telegram
     options = [opt["text"] for opt in question["options"]]
 
-    # Send the quiz message
+    # Send the quiz message (no open_period parameter to keep the poll open indefinitely)
     bot.send_poll(
         GROUP_ID,
         question["question_text"],  # The question text
@@ -78,36 +78,21 @@ def send_daily_quiz():
         correct_option_id=question["options"].index(next(
             # Correct option index
             opt for opt in question["options"] if opt["id"] in question["correct_option_ids"])),
-        explanation=question["explanation"],  # Use explanation
-        # The time in seconds to keep the poll open (adjust as needed)
-        open_period=30
+        explanation=question["explanation"]  # Use explanation
+        # No open_period specified (the poll will remain open indefinitely)
     )
 
-# Schedule the quiz to send every hour
+# Function to start the question sending loop
 
 
-def schedule_hourly_quiz():
-    # Send quiz immediately upon startup
-    send_daily_quiz()
-
-    # Then send every hour after that
-    schedule.every().hour.do(send_daily_quiz)
-
-
-# Start the hourly quiz scheduling
-schedule_hourly_quiz()
-
-# Keep checking the schedule
-
-
-def schedule_checker():
+def start_quiz_loop():
     while True:
-        schedule.run_pending()
-        time.sleep(1)
+        send_daily_quiz()  # Send one quiz
+        time.sleep(60 * 60)  # Wait for 60 minutes (1 hour)
 
 
-# Start the scheduler in a separate thread
-Thread(target=schedule_checker).start()
+# Start the quiz loop in a separate thread
+Thread(target=start_quiz_loop).start()
 
 # Start the bot polling (to keep the bot active and listening)
 bot.polling()
