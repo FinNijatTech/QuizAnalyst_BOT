@@ -2,6 +2,7 @@ import telebot
 import schedule
 import time
 import json
+import random  # Make sure to import the random module
 from threading import Thread
 
 # Your bot token from BotFather
@@ -35,6 +36,7 @@ def get_random_question():
         used_questions.clear()
         available_questions = questions
 
+    # This will now work after importing random
     question = random.choice(available_questions)
     question_index = questions.index(question)
     used_questions.append(question_index)
