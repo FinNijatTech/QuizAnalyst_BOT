@@ -7,10 +7,10 @@ import json
 from threading import Thread
 
 # Your bot token from BotFather
-bot = telebot.TeleBot("8523474061:AAHuh_y5Js6dUKx7Z6IAuSZCjIgkxkeQTDA")
+bot = telebot.TeleBot("8215582462:AAGVfaUCsgH7b0hhXRGG4-2J7-yMmEjRSuo")
 
 # Your group ID (replace with your actual group ID)
-GROUP_ID = "-1003483742586"  # Replace with your actual group ID
+GROUP_ID = "-1003665927824"  # Replace with your actual group ID
 
 # Load questions from the provided CSV file
 
