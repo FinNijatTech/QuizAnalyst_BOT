@@ -69,7 +69,7 @@ def send_daily_quiz():
 
 
 # Schedule the quiz to send every day at 9:00 AM
-schedule.every().day.at("09:00").do(send_daily_quiz)
+schedule.every().day.at("17:35").do(send_daily_quiz)
 
 # Keep checking the schedule
 
