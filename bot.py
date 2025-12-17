@@ -48,7 +48,7 @@ def get_random_question():
 # Function to send the quiz
 
 
-def send_hourly_quiz():
+def send_quiz():
     question = get_random_question()
 
     # Prepare options in the correct format for Telegram
@@ -68,19 +68,19 @@ def send_hourly_quiz():
         # No open_period specified (the poll will remain open indefinitely)
     )
 
-# Function to schedule the quiz every 4 hours
+# Function to schedule the quiz every 4 hours after the first quiz
 
 
-def schedule_4_hourly_quiz():
+def schedule_quiz_every_4_hours():
     # Send quiz immediately upon startup
-    send_hourly_quiz()
+    send_quiz()
 
     # Then send every 4 hours after that
-    schedule.every(4).hours.do(send_hourly_quiz)
+    schedule.every(4).hours.do(send_quiz)
 
 
-# Start the 4-hourly quiz scheduling
-schedule_4_hourly_quiz()
+# Start the scheduling function
+schedule_quiz_every_4_hours()
 
 # Keep checking the schedule
 
