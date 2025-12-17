@@ -17,11 +17,18 @@ GROUP_ID = "-1003665927824"  # Replace with your actual group ID
 def load_questions_from_json(file_name):
     with open(file_name, mode="r", encoding="utf-8") as file:
         questions = json.load(file)
+        # Debugging line to print JSON structure
+        print("Loaded JSON Data: ", questions)
     return questions
 
 
 # Load the questions from the JSON file
 questions = load_questions_from_json("FRM P1 All Questions.json")
+
+# Check the structure of loaded data
+print("Type of questions: ", type(questions))  # Should be a list
+# Should show the first question dictionary
+print("First question: ", questions[0])
 
 # Track used questions by their IDs (this ensures no duplicates)
 used_questions_ids = set()
@@ -29,9 +36,13 @@ used_questions_ids = set()
 
 def get_random_question():
     """Selects a random question, ensuring it's not repeated."""
-    # Filter out questions that have been used
-    available_questions = [
-        q for q in questions if q['id'] not in used_questions_ids]
+    # Ensure questions is a list
+    if isinstance(questions, list):
+        available_questions = [
+            q for q in questions if q['id'] not in used_questions_ids]
+    else:
+        raise TypeError("Questions data should be a list of dictionaries.")
+
     if not available_questions:
         # If all questions have been used, reset the used questions list
         used_questions_ids.clear()
