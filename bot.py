@@ -1,8 +1,6 @@
 import telebot
 import schedule
 import time
-import csv
-import random
 import json
 from threading import Thread
 
@@ -12,33 +10,17 @@ bot = telebot.TeleBot("8215582462:AAGVfaUCsgH7b0hhXRGG4-2J7-yMmEjRSuo")
 # Your group ID (replace with your actual group ID)
 GROUP_ID = "-1003665927824"  # Replace with your actual group ID
 
-# Load questions from the provided CSV file
+# Load questions from the provided JSON file
 
 
-def load_questions_from_csv(file_name):
-    questions = []
+def load_questions_from_json(file_name):
     with open(file_name, mode="r", encoding="utf-8") as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            # Parse the options and correct_option_ids (both stored in JSON-like format in CSV)
-            # Convert JSON string to a list
-            options = json.loads(row["options"])
-            # Same for correct_option_ids
-            correct_option_ids = json.loads(row["correct_option_ids"])
-
-            question = {
-                "question_text": row["question_text"],
-                "options": options,
-                "correct_option_ids": correct_option_ids,
-                # Directly taken from the CSV
-                "explanation": row["explanation"]
-            }
-            questions.append(question)
+        questions = json.load(file)
     return questions
 
 
-# Load the questions from the CSV file
-questions = load_questions_from_csv("FRM P1 Questions.csv")
+# Load the questions from the JSON file
+questions = load_questions_from_json("FRM P1 All Questions.json")
 
 # Track used questions (question indices or IDs)
 used_questions = []
@@ -59,6 +41,17 @@ def get_random_question():
 
     return question
 
+# Function to format table data as text (for questions with tables)
+
+
+def format_table_as_text(table_data):
+    rows = table_data["rows"]
+    headers = table_data["headers"]
+    table_text = " | ".join(headers) + "\n"
+    for row in rows:
+        table_text += " | ".join(row) + "\n"
+    return table_text
+
 # Function to send the quiz
 
 
@@ -67,6 +60,12 @@ def send_daily_quiz():
 
     # Prepare options in the correct format for Telegram
     options = [opt["text"] for opt in question["options"]]
+
+    # If the question has a table, format it as text
+    if question.get("tableData"):
+        table_text = format_table_as_text(question["tableData"])
+        # Append table as text to question text
+        question["question_text"] += f"\n\n{table_text}"
 
     # Send the quiz message (no open_period parameter to keep the poll open indefinitely)
     bot.send_poll(
@@ -82,17 +81,31 @@ def send_daily_quiz():
         # No open_period specified (the poll will remain open indefinitely)
     )
 
-# Function to start the question sending loop
+# Schedule the quiz to send every 4 hours (6 questions per day)
 
 
-def start_quiz_loop():
+def schedule_quiz_every_4_hours():
+    # Send quiz immediately upon startup
+    send_daily_quiz()
+
+    # Then send every 4 hours after that
+    schedule.every(4).hours.do(send_daily_quiz)
+
+
+# Start the quiz scheduling loop
+schedule_quiz_every_4_hours()
+
+# Keep checking the schedule
+
+
+def schedule_checker():
     while True:
-        send_daily_quiz()  # Send one quiz
-        time.sleep(60 * 60)  # Wait for 60 minutes (1 hour)
+        schedule.run_pending()
+        time.sleep(1)
 
 
-# Start the quiz loop in a separate thread
-Thread(target=start_quiz_loop).start()
+# Start the scheduler in a separate thread
+Thread(target=schedule_checker).start()
 
 # Start the bot polling (to keep the bot active and listening)
 bot.polling()
