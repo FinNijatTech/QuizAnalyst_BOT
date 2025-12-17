@@ -21,7 +21,7 @@ def load_questions_from_csv(file_name):
         reader = csv.DictReader(file)
         for row in reader:
             # Parse the options and correct_option_ids (both stored in JSON-like format in CSV)
-            # Convert the JSON string to a list
+            # Convert JSON string to a list
             options = json.loads(row["options"])
             # Same for correct_option_ids
             correct_option_ids = json.loads(row["correct_option_ids"])
@@ -59,7 +59,7 @@ def get_random_question():
 
     return question
 
-# Function to send the daily quiz
+# Function to send the quiz
 
 
 def send_daily_quiz():
@@ -83,9 +83,19 @@ def send_daily_quiz():
         open_period=30
     )
 
+# Schedule the quiz to send every hour
 
-# Schedule the quiz to send every day at 9:00 AM (adjust time as needed)
-schedule.every().day.at("17:47").do(send_daily_quiz)
+
+def schedule_hourly_quiz():
+    # Send quiz immediately upon startup
+    send_daily_quiz()
+
+    # Then send every hour after that
+    schedule.every().hour.do(send_daily_quiz)
+
+
+# Start the hourly quiz scheduling
+schedule_hourly_quiz()
 
 # Keep checking the schedule
 
@@ -99,5 +109,5 @@ def schedule_checker():
 # Start the scheduler in a separate thread
 Thread(target=schedule_checker).start()
 
-# Start the bot polling
+# Start the bot polling (to keep the bot active and listening)
 bot.polling()
