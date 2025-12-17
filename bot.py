@@ -45,7 +45,7 @@ def get_random_question():
 
     return question
 
-# Function to send the daily quiz
+# Function to send the quiz
 
 
 def send_hourly_quiz():
@@ -54,7 +54,7 @@ def send_hourly_quiz():
     # Prepare options in the correct format for Telegram
     options = [opt["text"] for opt in question["options"]]
 
-    # Send the quiz message
+    # Send the quiz message (no open_period, the poll will remain open indefinitely)
     bot.send_poll(
         GROUP_ID,
         question["questionText"],  # The question text
@@ -64,24 +64,23 @@ def send_hourly_quiz():
         correct_option_id=question["options"].index(next(
             # Correct option index
             opt for opt in question["options"] if opt["id"] in question["correctOptionIds"])),
-        explanation=question["explanation"],  # Use explanation
-        # The time in seconds to keep the poll open (adjust as needed)
-        open_period=60  # Keep the poll open for 1 minute
+        explanation=question["explanation"]  # Use explanation
+        # No open_period specified (the poll will remain open indefinitely)
     )
 
-# Function to schedule the quiz
+# Function to schedule the quiz every 4 hours
 
 
-def schedule_hourly_quiz():
+def schedule_4_hourly_quiz():
     # Send quiz immediately upon startup
     send_hourly_quiz()
 
-    # Then send every hour after that
-    schedule.every().hour.do(send_hourly_quiz)
+    # Then send every 4 hours after that
+    schedule.every(4).hours.do(send_hourly_quiz)
 
 
-# Start the hourly quiz scheduling
-schedule_hourly_quiz()
+# Start the 4-hourly quiz scheduling
+schedule_4_hourly_quiz()
 
 # Keep checking the schedule
 
