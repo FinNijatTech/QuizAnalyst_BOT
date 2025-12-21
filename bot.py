@@ -3,7 +3,9 @@ import schedule
 import time
 import json
 import random
+import os
 from threading import Thread
+import pickle
 
 # Your bot token from BotFather
 bot = telebot.TeleBot("8215582462:AAGVfaUCsgH7b0hhXRGG4-2J7-yMmEjRSuo")
@@ -24,8 +26,29 @@ def load_questions_from_json(file_name):
 # Load questions from JSON file
 questions = load_questions_from_json("FRM P1 All Questions.json")
 
-# Track used questions (question indices or IDs)
-used_questions = []
+# Path for storing used question indices
+USED_QUESTIONS_FILE = "used_questions.pkl"
+
+# Load used questions (stored as a set for efficiency)
+
+
+def load_used_questions():
+    if os.path.exists(USED_QUESTIONS_FILE):
+        with open(USED_QUESTIONS_FILE, "rb") as f:
+            return pickle.load(f)
+    else:
+        return set()
+
+# Save used questions to a file
+
+
+def save_used_questions(used_questions):
+    with open(USED_QUESTIONS_FILE, "wb") as f:
+        pickle.dump(used_questions, f)
+
+
+# Track used questions as a set for fast lookup and modification
+used_questions = load_used_questions()
 
 # Function to get random question ensuring it's not repeated
 
@@ -35,13 +58,15 @@ def get_random_question():
     available_questions = [q for i, q in enumerate(
         questions) if i not in used_questions]
     if not available_questions:
-        # Reset used questions if all have been used
+        # Reset used questions only if all questions have been used
         used_questions.clear()
-        available_questions = questions
 
     question = random.choice(available_questions)
     question_index = questions.index(question)
-    used_questions.append(question_index)
+    used_questions.add(question_index)
+
+    # Save the used questions
+    save_used_questions(used_questions)
 
     return question
 
@@ -63,36 +88,29 @@ def send_quiz():
         type="quiz",  # It's a quiz
         correct_option_id=question["options"].index(next(
             # Correct option index
-            opt for opt in question["options"] if opt["id"] in question["correctOptionIds"])),
-        explanation=question["explanation"]  # Use explanation
-        # No open_period specified (the poll will remain open indefinitely)
+            opt for opt in question["options"] if opt["id"] in question["correctOptionIds"]))),
+    explanation = question["explanation"]  # Use explanation
     )
 
-# Function to schedule the quiz every 4 hours after the first quiz
+        # Function to schedule the quiz every 4 hours after the first quiz
+    def schedule_quiz_every_4_hours():
+        # Send quiz immediately upon startup
+        send_quiz()
 
-
-def schedule_quiz_every_4_hours():
-    # Send quiz immediately upon startup
-    send_quiz()
-
-    # Then send every 4 hours after that
+        # Then send every 4 hours after that
     schedule.every(4).hours.do(send_quiz)
 
+        # Start the scheduling function
+        schedule_quiz_every_4_hours()
 
-# Start the scheduling function
-schedule_quiz_every_4_hours()
-
-# Keep checking the schedule
-
-
-def schedule_checker():
-    while True:
-        schedule.run_pending()
+        # Keep checking the schedule
+    def schedule_checker():
+        while True:
+    schedule.run_pending()
         time.sleep(1)
 
+        # Start the scheduler in a separate thread
+    Thread(target=schedule_checker).start()
 
-# Start the scheduler in a separate thread
-Thread(target=schedule_checker).start()
-
-# Start the bot polling (to keep the bot active and listening)
-bot.polling()
+        # Start the bot polling (to keep the bot active and listening)
+        bot.polling()
