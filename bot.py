@@ -88,29 +88,35 @@ def send_quiz():
         type="quiz",  # It's a quiz
         correct_option_id=question["options"].index(next(
             # Correct option index
-            opt for opt in question["options"] if opt["id"] in question["correctOptionIds"]))),
-    explanation = question["explanation"]  # Use explanation
+            opt for opt in question["options"] if opt["id"] in question["correctOptionIds"])),
+        explanation=question["explanation"]  # Use explanation
     )
 
-        # Function to schedule the quiz every 4 hours after the first quiz
-    def schedule_quiz_every_4_hours():
-        # Send quiz immediately upon startup
-        send_quiz()
+# Function to schedule the quiz every 4 hours after the first quiz
 
-        # Then send every 4 hours after that
+
+def schedule_quiz_every_4_hours():
+    # Send quiz immediately upon startup
+    send_quiz()
+
+    # Then send every 4 hours after that
     schedule.every(4).hours.do(send_quiz)
 
-        # Start the scheduling function
-        schedule_quiz_every_4_hours()
 
-        # Keep checking the schedule
-    def schedule_checker():
-        while True:
-    schedule.run_pending()
+# Start the scheduling function
+schedule_quiz_every_4_hours()
+
+# Keep checking the schedule
+
+
+def schedule_checker():
+    while True:
+        schedule.run_pending()
         time.sleep(1)
 
-        # Start the scheduler in a separate thread
-    Thread(target=schedule_checker).start()
 
-        # Start the bot polling (to keep the bot active and listening)
-        bot.polling()
+# Start the scheduler in a separate thread
+Thread(target=schedule_checker).start()
+
+# Start the bot polling (to keep the bot active and listening)
+bot.polling()
