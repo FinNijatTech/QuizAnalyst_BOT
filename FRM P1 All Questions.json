@@ -58781,45 +58781,6 @@
       "createdAt": "2025-12-05T11:42:02.068Z"
     },
     {
-      "id": "76322a61-262d-4451-aeb0-e1f960f8d9a6",
-      "chapterId": "a17aeb2c-943b-4a96-81ea-d53f2bcf8ed0",
-      "scenarioId": null,
-      "scenarioOrder": null,
-      "questionText": "A trader buys a European put option with a strike price of USD 55 for a premium of USD 7. The stock price at expiration is USD 50. What is the trader's profit?",
-      "imageUrl": null,
-      "tableData": null,
-      "questionType": "multiple_choice",
-      "options": [
-        {
-          "id": "A",
-          "text": "USD 5"
-        },
-        {
-          "id": "B",
-          "text": "USD 7"
-        },
-        {
-          "id": "C",
-          "text": "USD 12"
-        },
-        {
-          "id": "D",
-          "text": "USD 3"
-        }
-      ],
-      "correctOptionIds": [
-        "A"
-      ],
-      "requiredSelections": 1,
-      "numericAnswer": null,
-      "numericUnit": null,
-      "numericUnitPosition": "suffix",
-      "numericPlaceholder": null,
-      "explanation": "Profit = (Strike price - Stock price at expiration - Option premium) = (55 - 50 - 7) = USD 5.",
-      "difficulty": "medium",
-      "createdAt": "2025-12-05T11:42:02.115Z"
-    },
-    {
       "id": "cf5bbc77-287e-4367-b76e-4026565d935e",
       "chapterId": "a17aeb2c-943b-4a96-81ea-d53f2bcf8ed0",
       "scenarioId": null,

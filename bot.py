@@ -57,9 +57,13 @@ def get_random_question():
     """Selects a random question, ensuring it's not repeated."""
     available_questions = [q for i, q in enumerate(
         questions) if i not in used_questions]
+
     if not available_questions:
-        # Reset used questions only if all questions have been used
+        # Reset used questions if all have been used
         used_questions.clear()
+        # Refresh available_questions after reset
+        # Copy the full list now that used_questions is empty
+        available_questions = questions[:]
 
     question = random.choice(available_questions)
     question_index = questions.index(question)
@@ -87,8 +91,8 @@ def send_quiz():
         is_anonymous=False,  # Make the poll public
         type="quiz",  # It's a quiz
         correct_option_id=question["options"].index(next(
-            # Correct option index
-            opt for opt in question["options"] if opt["id"] in question["correctOptionIds"])),
+            opt for opt in question["options"] if opt["id"] in question["correctOptionIds"]
+        )),
         explanation=question["explanation"]  # Use explanation
     )
 
